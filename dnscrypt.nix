@@ -2,7 +2,11 @@
 
 with lib;
 
-let cfg = config.networking.dns-crypt;
+let
+  cfg = config.networking.dns-crypt;
+  proxy-addr = sep: "${cfg.interface}${sep}${builtins.toString cfg.proxy-port}";
+  proxy-addr-listen = proxy-addr ":";
+  proxy-addr-forward = proxy-addr "@";
 in {
   options.networking.dns-crypt = {
     enable = mkOption {
@@ -17,6 +21,14 @@ in {
       type = types.str;
       default = "127.0.0.1";
     };
+    extra-interfaces = mkOption {
+      type = types.listOf types.str;
+      default = [ ];
+    };
+    access-control = mkOption {
+      type = types.listOf types.str;
+      default = [ "127.0.0.0/8 allow" ];
+    };
   };
   config = {
     services = {
@@ -26,11 +38,11 @@ in {
         enableRootTrustAnchor = false;
         settings = {
           server = {
-            access-control = [ "127.0.0.0/8 allow" "192.168.99.0/28 allow" ];
+            access-control = cfg.access-control;
             do-not-query-localhost = "no";
             hide-identity = "yes";
             hide-version = "yes";
-            interface = [ "${cfg.interface}" "192.168.99.1" ];
+            interface = [ cfg.interface ] ++ cfg.extra-interfaces;
             minimal-responses = "yes";
             prefetch-key = "yes";
             prefetch = "yes";
@@ -38,8 +50,7 @@ in {
           };
           forward-zone = [{
             name = ".";
-            forward-addr =
-              [ "${cfg.interface}@${builtins.toString cfg.proxy-port}" ];
+            forward-addr = [ proxy-addr-forward ];
           }];
         };
       };
@@ -48,8 +59,7 @@ in {
         settings = {
           ipv6_servers = false;
           require_dnssec = true;
-          listen_addresses =
-            [ "${cfg.interface}:${builtins.toString cfg.proxy-port}" ];
+          listen_addresses = [ proxy-addr-listen ];
           sources.public-resolvers = {
             urls = [
               "https://raw.githubusercontent.com/DNSCrypt/dnscrypt-resolvers/master/v3/public-resolvers.md"
