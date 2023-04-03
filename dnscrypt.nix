@@ -73,10 +73,7 @@ in {
       };
     };
     systemd.services = {
-      unbound = {
-        partOf = [ "network.target" ];
-        requires = [ "dnscrypt-proxy2.service" ];
-      };
+      unbound = { partOf = [ "network.target" ]; };
       dnscrypt-proxy2 = { partOf = [ "network.target" ]; };
     };
     networking = {
