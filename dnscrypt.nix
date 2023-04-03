@@ -30,9 +30,9 @@ in {
       default = [ "127.0.0.0/8 allow" ];
     };
   };
-  config = {
+  config = mkIf cfg.enable {
     services = {
-      unbound = mkIf cfg.enable {
+      unbound = {
         enable = true;
         resolveLocalQueries = true;
         enableRootTrustAnchor = false;
@@ -54,7 +54,7 @@ in {
           }];
         };
       };
-      dnscrypt-proxy2 = mkIf cfg.enable {
+      dnscrypt-proxy2 = {
         enable = true;
         settings = {
           ipv6_servers = false;
@@ -72,13 +72,14 @@ in {
         };
       };
     };
-    systemd.services.unbound =
-      mkIf cfg.enable { partOf = [ "network.target" ]; };
-    systemd.services.dnscrypt-proxy2 = mkIf cfg.enable {
-      requires = [ "unbound.service" ];
-      partOf = [ "network.target" ];
+    systemd.services = {
+      unbound = {
+        partOf = [ "network.target" ];
+        requires = [ "dnscrypt-proxy2.service" ];
+      };
+      dnscrypt-proxy2 = { partOf = [ "network.target" ]; };
     };
-    networking = mkIf cfg.enable {
+    networking = {
       networkmanager = { insertNameservers = [ "${cfg.interface}" ]; };
       nameservers = [ "${cfg.interface}" ];
       dhcpcd = {
@@ -90,7 +91,7 @@ in {
       };
     };
     environment = {
-      etc = mkIf cfg.enable {
+      etc = {
         "resolv.conf" = {
           mode = "0444";
           source = lib.mkOverride 0
