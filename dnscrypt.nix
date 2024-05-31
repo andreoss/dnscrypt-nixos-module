@@ -1,4 +1,9 @@
-{ config, lib, pkgs, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
 
 with lib;
 
@@ -7,7 +12,8 @@ let
   proxy-addr = sep: "${cfg.interface}${sep}${builtins.toString cfg.proxy-port}";
   proxy-addr-listen = proxy-addr ":";
   proxy-addr-forward = proxy-addr "@";
-in {
+in
+{
   options.networking.dns-crypt = {
     enable = mkOption {
       type = types.bool;
@@ -48,10 +54,12 @@ in {
             prefetch = "yes";
             verbosity = 4;
           };
-          forward-zone = [{
-            name = ".";
-            forward-addr = [ proxy-addr-forward ];
-          }];
+          forward-zone = [
+            {
+              name = ".";
+              forward-addr = [ proxy-addr-forward ];
+            }
+          ];
         };
       };
       dnscrypt-proxy2 = {
@@ -66,18 +74,23 @@ in {
               "https://download.dnscrypt.info/resolvers-list/v3/public-resolvers.md"
             ];
             cache_file = "/var/lib/dnscrypt-proxy2/public-resolvers.md";
-            minisign_key =
-              "RWQf6LRCGA9i53mlYecO4IzT51TGPpvWucNSCh1CBM0QTaLn73Y7GFO3";
+            minisign_key = "RWQf6LRCGA9i53mlYecO4IzT51TGPpvWucNSCh1CBM0QTaLn73Y7GFO3";
           };
         };
       };
     };
     systemd.services = {
-      unbound = { partOf = [ "network.target" ]; };
-      dnscrypt-proxy2 = { partOf = [ "network.target" ]; };
+      unbound = {
+        partOf = [ "network.target" ];
+      };
+      dnscrypt-proxy2 = {
+        partOf = [ "network.target" ];
+      };
     };
     networking = {
-      networkmanager = { insertNameservers = [ "${cfg.interface}" ]; };
+      networkmanager = {
+        insertNameservers = [ "${cfg.interface}" ];
+      };
       nameservers = [ "${cfg.interface}" ];
       dhcpcd = {
         extraConfig = ''
@@ -91,8 +104,7 @@ in {
       etc = {
         "resolv.conf" = {
           mode = "0444";
-          source = lib.mkOverride 0
-            (pkgs.writeText "resolv.conf" "nameserver ${cfg.interface}");
+          source = lib.mkOverride 0 (pkgs.writeText "resolv.conf" "nameserver ${cfg.interface}");
         };
       };
     };
