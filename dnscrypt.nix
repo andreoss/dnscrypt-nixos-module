@@ -1,5 +1,5 @@
 {
-  config,
+  cf,
   lib,
   pkgs,
   ...
@@ -8,7 +8,7 @@
 with lib;
 
 let
-  cfg = config.networking.dns-crypt;
+  cfg = cf.networking.dns-crypt;
   proxy-addr = sep: "${cfg.interface}${sep}${builtins.toString cfg.proxy-port}";
   proxy-addr-listen = proxy-addr ":";
   proxy-addr-forward = proxy-addr "@";

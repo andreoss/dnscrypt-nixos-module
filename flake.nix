@@ -16,7 +16,7 @@
               ...
             }:
             {
-              system.stateVersion = "23.05";
+              system.stateVersion = "25.11";
               services.getty.autologinUser = "root";
               environment.systemPackages = with pkgs; [ dig ];
               networking = {
