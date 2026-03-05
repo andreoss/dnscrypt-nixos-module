@@ -62,7 +62,7 @@ in
           ];
         };
       };
-      dnscrypt-proxy2 = {
+      dnscrypt-proxy = {
         enable = true;
         settings = {
           ipv6_servers = false;
@@ -80,11 +80,22 @@ in
       };
     };
     systemd.services = {
+
       unbound = {
         partOf = [ "network.target" ];
+        after = [ "systemd-networkd-wait-online.service" ];
+        serviceConfig = {
+          Restart = lib.mkForce "always";
+        };
       };
       dnscrypt-proxy2 = {
         partOf = [ "network.target" ];
+        wantedBy = [ "unbound.service" ];
+        after = [ "systemd-networkd-wait-online.service" ];
+        serviceConfig = {
+          Restart = lib.mkForce "always";
+          StateDirectory = "/var/db/dns-crypt/";
+        };
       };
     };
     networking = {
