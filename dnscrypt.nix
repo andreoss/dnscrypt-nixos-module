@@ -98,7 +98,7 @@ in
       };
     };
     networking = {
-      resolvconf.enable = true;
+      resolvconf.enable = lib.mkForce false;
       networkmanager = {
         insertNameservers = [ "${cfg.interface}" ];
       };
