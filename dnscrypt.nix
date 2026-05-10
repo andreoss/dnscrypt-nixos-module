@@ -80,7 +80,6 @@ in
       };
     };
     systemd.services = {
-
       unbound = {
         partOf = [ "network.target" ];
         after = [ "systemd-networkd-wait-online.service" ];
@@ -99,6 +98,7 @@ in
       };
     };
     networking = {
+      resolvconf.enable = true;
       networkmanager = {
         insertNameservers = [ "${cfg.interface}" ];
       };
